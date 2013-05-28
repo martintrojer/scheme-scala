@@ -1,26 +1,23 @@
 package mtscheme
 
+import mtscheme.Interpreter._
+
 object BuiltIn {
 
-  def aritFun(op: ((Double, Double) => Double))(env: Environment, comb: List[Expression]) = {
-
-    val error = new IllegalArgumentException("arithmetic error")
-
-    def afn() = comb match {
-      case List()     => throw error
-      case e :: t     => (Interpreter.eval(env, e))._2 match {
-        case Value(Num(v))  => {
-          t.foldLeft(v)((acc, e) => (Interpreter.eval(env, e))._2 match {
-            case Value(Num(a))  => op(acc,a)
-            case _              => throw error
-          })}
-        case _              => throw error
-        }
-      }
-    (env, Value(Num(afn())))
+  def aritFun(op: ((Double, Double) => Double))
+             (env: Environment, comb: List[Expression]) = {
+    val terms = comb.map(e => eval(env, e)._2)
+    val first = terms.head match { case Value(Num(v)) => v; case _ => 0}
+    val res = terms.tail.foldLeft(first)((acc, e) => e match {
+      case Value(Num(v))  => op(acc, v)
+      case _              => throw new IllegalArgumentException("arithmetic error")
+    })
+    (env, Value(Num(res)))
   }
 
-  val globalEnv = Environment(Env(
-                      EnvMap("+" -> Procedure(aritFun(_+_) _)),
-                      EnvMap("-" -> Procedure(aritFun(_-_) _))))
+  val globalEnv = Environment(Env(EnvMap(
+                      ("+" -> Procedure(aritFun(_+_) _)),
+                      ("-" -> Procedure(aritFun(_-_) _)),
+                      ("*" -> Procedure(aritFun(_*_) _)),
+                      ("/" -> Procedure(aritFun(_/_) _)))))
 }

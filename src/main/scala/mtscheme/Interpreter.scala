@@ -54,13 +54,13 @@ object Interpreter {
     f(env, args)
 
   // bind argument in a new environment
-  def bindArg(env: Environment, arg: ListType, expr: Expression) = arg match {
+  private def bindArg(env: Environment, arg: ListType, expr: Expression) = arg match {
     case LValue(Name(n)) => env.addEntry(n -> eval(env, expr)._2)
     case _               => throw new IllegalArgumentException
   }
 
   // Eval a combination (a list of expressions), return the value of the last one
-  def evalAll(env: Environment, comb: List[Expression]): (Environment, Expression) = comb match {
+  private def evalAll(env: Environment, comb: List[Expression]): (Environment, Expression) = comb match {
     case List() => (env, NullExpr())
     case h :: t => {
       val (nenv, res) = eval(env, h)
@@ -71,5 +71,4 @@ object Interpreter {
       }
     }
   }
-
 }
