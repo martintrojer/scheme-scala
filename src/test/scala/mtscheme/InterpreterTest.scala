@@ -20,6 +20,8 @@ class InterpreterTest extends FunSuite {
     case _              => throw new IllegalArgumentException("expression failure")
   }
 
+  def getEnv(env: Environment, exprS: String) = eval(env, parse(exprS).head)._1
+
   def testNumber(env: Environment, exprS: String, correct: BigDecimal) = {
     expectResult(correct) { getNumResult(env, parse(exprS).head) }
   }
@@ -124,6 +126,11 @@ class InterpreterTest extends FunSuite {
     testNumber(globalEnv, "(cond ((= 1 2) 1) (true 2))",  2)
     testNumber(globalEnv, "(cond (false 1) (false 2) (else 3))",  3)
     testNil(globalEnv, "(cond (false 1) (false 2))")
+  }
+
+  test("define") {
+    expectResult(Some(Value(Num(4)))) { getEnv(globalEnv, "(define lisa 4)").lookUp("lisa") }
+    expectResult(Some(Value(Num(3)))) { getEnv(globalEnv, "(define nisse (+ 1 1 1))").lookUp("nisse") }
   }
 
 }
