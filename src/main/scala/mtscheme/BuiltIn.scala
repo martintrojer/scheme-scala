@@ -58,6 +58,31 @@ object BuiltIn {
      }
   }
 
+  def _cond(env: Environment, comb: List[Expression]) = {
+    val error = new IllegalArgumentException("cond")
+
+    def doExpr(comb: List[Expression]) = comb match {
+      case Symbol("else") :: posExpr :: Nil =>
+        Some(eval(env, posExpr)._2)
+      case condExpr :: posExpr :: Nil       => eval(env, condExpr)._2 match {
+        case Value(Bool(true))  => Some(eval(env, posExpr)._2)
+        case Value(Bool(false)) => None
+        case _                  => throw error
+      }
+      case _                                => throw error
+    }
+
+    def runExprs(comb: List[Expression]): Expression = comb match {
+      case Combination(c) :: rest   => doExpr(c) match {
+        case Some(e)    => e
+        case None       => runExprs(rest)
+      }
+      case _                        => NullExpr()
+    }
+
+    (env, runExprs(comb))
+  }
+
   val globalEnv = Environment(Env(EnvMap(
                       ("+" -> Procedure(aritFun(_+_) _)),
                       ("-" -> Procedure(aritFun(_-_) _)),
@@ -74,6 +99,7 @@ object BuiltIn {
                       ("false" -> Value(Bool(false))),
 
                       ("not" -> Procedure(_not)),
-                      ("if" -> Procedure(_if))
+                      ("if" -> Procedure(_if)),
+                      ("cond" -> Procedure(_cond))
     )))
 }

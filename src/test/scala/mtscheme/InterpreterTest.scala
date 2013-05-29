@@ -117,7 +117,13 @@ class InterpreterTest extends FunSuite {
     testNumber(globalEnv, "(if (< (+ 1 1 1) 1) 11 (* 2 5))", 10)
     testNumber(globalEnv, "(if true 1)",                     1)
     testNil(globalEnv, "(if false 1)")
+  }
 
+  test("cond") {
+    testNumber(globalEnv, "(cond (true 1) ((= 1 2) 2))",  1)
+    testNumber(globalEnv, "(cond ((= 1 2) 1) (true 2))",  2)
+    testNumber(globalEnv, "(cond (false 1) (false 2) (else 3))",  3)
+    testNil(globalEnv, "(cond (false 1) (false 2))")
   }
 
 }
