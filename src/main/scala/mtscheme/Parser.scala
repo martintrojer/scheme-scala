@@ -46,7 +46,7 @@ object Parser {
         val (n, rst) = token(d.toString, t)
         doTok(TNumber(n) :: acc, rst)
       }
-      // TODO; how to remove this duplication?
+      // TODO; how to remove this duplication? (extractors?)
       case d :: t if d.isDigit        => {
       val (n, rst) = token(d.toString, t)
         doTok(TNumber(n) :: acc, rst)
@@ -62,8 +62,8 @@ object Parser {
   }
 
   def parse(source: String) = {
-    def mapToks(tok: Token) = tok match {
-      case TNumber(n)     => Value(Num(n.toDouble))
+    def mapTok(tok: Token) = tok match {
+      case TNumber(n)     => Value(Num(BigDecimal(n)))
       case TString(s)     => Value(Name(s))
       case TSymbol(s)     => Symbol(s)
       case _              => throw new IllegalArgumentException("syntax error")
@@ -74,7 +74,7 @@ object Parser {
         doParse(Combination(e) :: acc, rst)
       }
       case TClose() :: t  => (acc.reverse, t)
-      case h :: t         => doParse(mapToks(h) :: acc, t)
+      case h :: t         => doParse(mapTok(h) :: acc, t)
       case List()         => (acc.reverse, List())
     }
 
