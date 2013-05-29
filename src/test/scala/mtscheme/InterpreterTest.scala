@@ -27,6 +27,11 @@ class InterpreterTest extends FunSuite {
   def testBool(env: Environment, exprS: String, correct: Boolean) = {
     expectResult(correct) { getBoolResult(env, parse(exprS).head) }
   }
+
+  def testNil(env: Environment, exprS: String) = {
+    expectResult(NullExpr()) { eval(env, parse(exprS).head)._2 }
+  }
+
   // ------------------------------------------
 
   test("add") {
@@ -94,11 +99,25 @@ class InterpreterTest extends FunSuite {
   }
 
   test("le") {
-    testBool(globalEnv, "(<= 2 2)", (2<=2))
-    testBool(globalEnv, "(<= 1 2)", (1<=2))
-    testBool(globalEnv, "(<= 2 1)", (2<=1))
+    testBool(globalEnv, "(<= 2 2)",         (2<=2))
+    testBool(globalEnv, "(<= 1 2)",         (1<=2))
+    testBool(globalEnv, "(<= 2 1)",         (2<=1))
     testBool(globalEnv, "(<= (+ 1 1 1) 2)", ((1+1+1)<=2))
-    testBool(globalEnv, "(<= 1)", (true))
-    testBool(globalEnv, "(<= 1 1 (+ 1 1) 1)", (false))
+    testBool(globalEnv, "(<= 1)",           (true))
+    testBool(globalEnv, "(<= 1 1 (+ 1 1) 1)",(false))
   }
+
+  test("not") {
+    testBool(globalEnv, "(not (= 1 1))",    (false))
+    testBool(globalEnv, "(not (not (= 1 1)))",(true))
+  }
+
+  test("if") {
+    testNumber(globalEnv, "(if (< 2 1) 10 11)",              11)
+    testNumber(globalEnv, "(if (< (+ 1 1 1) 1) 11 (* 2 5))", 10)
+    testNumber(globalEnv, "(if true 1)",                     1)
+    testNil(globalEnv, "(if false 1)")
+
+  }
+
 }
