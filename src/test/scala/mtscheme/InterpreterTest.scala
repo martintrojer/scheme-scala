@@ -34,97 +34,100 @@ class InterpreterTest extends FunSuite {
     expectResult(NullExpr()) { eval(env, parse(exprS).head)._2 }
   }
 
+  val testNumberG = (testNumber _).curried(globalEnv)
+  val testBoolG = (testBool _).curried(globalEnv)
+
   // ------------------------------------------
 
   test("add") {
-    testNumber(globalEnv, "(+ 1 2)",        (1+2))
-    testNumber(globalEnv, "(+ 1 (+ 2 3))",  (1+2+3))
-    testNumber(globalEnv, "(+ 1)",          (1))
-    testNumber(globalEnv, "(+ 1 1 1)",      (1+1+1))
+    testNumberG("(+ 1 2)")        (1+2)
+    testNumberG("(+ 1 (+ 2 3))")  (1+2+3)
+    testNumberG("(+ 1)")          (1)
+    testNumberG("(+ 1 1 1)")      (1+1+1)
   }
 
   test("sub") {
-    testNumber(globalEnv, "(- 1 2)",        (1-2))
-    testNumber(globalEnv, "(- 1 (- 2 3))",  (1-(2-3)))
-    // testNumber(globalEnv, "(- 1)",          (-1))
-    testNumber(globalEnv, "(- 1 1 1)",      (1-1-1))
+    testNumberG("(- 1 2)")        (1-2)
+    testNumberG("(- 1 (- 2 3))")  (1-(2-3))
+    // testNumberG("(- 1)")          (-1)
+    testNumberG("(- 1 1 1)")      (1-1-1)
   }
 
   test("mul") {
-    testNumber(globalEnv, "(* 2 3.14)",     (2.0*3.14))
-    testNumber(globalEnv, "(+ 1 (* 2 3))",  (1+2*3))
-    testNumber(globalEnv, "(* 1)",          (1))
-    testNumber(globalEnv, "(* 2 1 2 2)",    (2*1*2*2))
+    testNumberG("(* 2 3.14)")     (2.0*3.14)
+    testNumberG("(+ 1 (* 2 3))")  (1+2*3)
+    testNumberG("(* 1)")          (1)
+    testNumberG("(* 2 1 2 2)")    (2*1*2*2)
   }
 
   test("div") {
-    testNumber(globalEnv, "(/ 9 3)",        (9/3))
-    testNumber(globalEnv, "(+ 1 (/ 2 3))",  (1.0+BigDecimal(2.0)/3.0))
-    testNumber(globalEnv, "(/ 1)",          (1))
-    // testNumber(globalEnv, "(/ 2)",          (1.0/2.0))      // TODO; special case not handled correctly
-    testNumber(globalEnv, "(/ 1 2 3)",      (1.0/BigDecimal(2.0)/3.0))
+    testNumberG("(/ 9 3)")        (9/3)
+    testNumberG("(+ 1 (/ 2 3))")  (1.0+BigDecimal(2.0)/3.0)
+    testNumberG("(/ 1)")          (1)
+    // testNumberG("(/ 2)")          (1.0/2.0)      // TODO; special case not handled correctly
+    testNumberG("(/ 1 2 3)")      (1.0/BigDecimal(2.0)/3.0)
   }
 
   test("eq") {
-    testBool(globalEnv, "(= 2 2)",          (2==2))
-    testBool(globalEnv, "(= 2 (+ 1 1))",    (2==(1+1)))
-    testBool(globalEnv, "(= 1)",            (true))
-    testBool(globalEnv, "(= 1 1 2)",        (false))
-    testBool(globalEnv, "(= 1 1 (+ 1 1) 1)",(false))
+    testBoolG("(= 2 2)")          (2==2)
+    testBoolG("(= 2 (+ 1 1))")    (2==(1+1))
+    testBoolG("(= 1)")            (true)
+    testBoolG("(= 1 1 2)")        (false)
+    testBoolG("(= 1 1 (+ 1 1) 1)")(false)
   }
 
   test("gt") {
-    testBool(globalEnv, "(> 2 2)",          (2>2))
-    testBool(globalEnv, "(> 1 2)",          (1>2))
-    testBool(globalEnv, "(> 2 1)",          (2>1))
-    testBool(globalEnv, "(> (+ 1 1 1) 2)",  ((1+1+1)>2))
-    testBool(globalEnv, "(> 1)",            (true))
-    testBool(globalEnv, "(> 1 1 (+ 1 1) 1)",(false))
+    testBoolG("(> 2 2)")          (2>2)
+    testBoolG("(> 1 2)")          (1>2)
+    testBoolG("(> 2 1)")          (2>1)
+    testBoolG("(> (+ 1 1 1) 2)")  ((1+1+1)>2)
+    testBoolG("(> 1)")            (true)
+    testBoolG("(> 1 1 (+ 1 1) 1)")(false)
   }
 
   test("lt") {
-    testBool(globalEnv, "(< 2 2)",          (2<2))
-    testBool(globalEnv, "(< 1 2)",          (1<2))
-    testBool(globalEnv, "(< 2 1)",          (2<1))
-    testBool(globalEnv, "(< (+ 1 1 1) 2)",  ((1+1+1)<2))
-    testBool(globalEnv, "(< 1)",            (true))
-    testBool(globalEnv, "(< 1 1 (+ 1 1) 1)",(false))
+    testBoolG("(< 2 2)")          (2<2)
+    testBoolG("(< 1 2)")          (1<2)
+    testBoolG("(< 2 1)")          (2<1)
+    testBoolG("(< (+ 1 1 1) 2)")  ((1+1+1)<2)
+    testBoolG("(< 1)")            (true)
+    testBoolG("(< 1 1 (+ 1 1) 1)")(false)
   }
 
   test("ge") {
-    testBool(globalEnv, "(>= 2 2)",         (2>=2))
-    testBool(globalEnv, "(>= 1 2)",         (1>=2))
-    testBool(globalEnv, "(>= 2 1)",         (2>=1))
-    testBool(globalEnv, "(>= (+ 1 1 1) 2)", ((1+1+1)>=2))
-    testBool(globalEnv, "(>= 1)",           (true))
-    testBool(globalEnv, "(>= 1 1 (+ 1 1) 1)",(false))
+    testBoolG("(>= 2 2)")         (2>=2)
+    testBoolG("(>= 1 2)")         (1>=2)
+    testBoolG("(>= 2 1)")         (2>=1)
+    testBoolG("(>= (+ 1 1 1) 2)") ((1+1+1)>=2)
+    testBoolG("(>= 1)")           (true)
+    testBoolG("(>= 1 1 (+ 1 1) 1)")(false)
   }
 
   test("le") {
-    testBool(globalEnv, "(<= 2 2)",         (2<=2))
-    testBool(globalEnv, "(<= 1 2)",         (1<=2))
-    testBool(globalEnv, "(<= 2 1)",         (2<=1))
-    testBool(globalEnv, "(<= (+ 1 1 1) 2)", ((1+1+1)<=2))
-    testBool(globalEnv, "(<= 1)",           (true))
-    testBool(globalEnv, "(<= 1 1 (+ 1 1) 1)",(false))
+    testBoolG("(<= 2 2)")         (2<=2)
+    testBoolG("(<= 1 2)")         (1<=2)
+    testBoolG("(<= 2 1)")         (2<=1)
+    testBoolG("(<= (+ 1 1 1) 2)") ((1+1+1)<=2)
+    testBoolG("(<= 1)")           (true)
+    testBoolG("(<= 1 1 (+ 1 1) 1)")(false)
   }
 
   test("not") {
-    testBool(globalEnv, "(not (= 1 1))",    (false))
-    testBool(globalEnv, "(not (not (= 1 1)))",(true))
+    testBoolG("(not (= 1 1))")    (false)
+    testBoolG("(not (not (= 1 1)))")(true)
   }
 
   test("if") {
-    testNumber(globalEnv, "(if (< 2 1) 10 11)",              11)
-    testNumber(globalEnv, "(if (< (+ 1 1 1) 1) 11 (* 2 5))", 10)
-    testNumber(globalEnv, "(if true 1)",                     1)
+    testNumberG("(if (< 2 1) 10 11)")               (11)
+    testNumberG("(if (< (+ 1 1 1) 1) 11 (* 2 5))")  (10)
+    testNumberG("(if true 1)")                      (1)
     testNil(globalEnv, "(if false 1)")
   }
 
   test("cond") {
-    testNumber(globalEnv, "(cond (true 1) ((= 1 2) 2))",  1)
-    testNumber(globalEnv, "(cond ((= 1 2) 1) (true 2))",  2)
-    testNumber(globalEnv, "(cond (false 1) (false 2) (else 3))",  3)
+    testNumberG("(cond (true 1) ((= 1 2) 2))")      (1)
+    testNumberG("(cond ((= 1 2) 1) (true 2))")      (2)
+    testNumberG("(cond (false 1) (false 2) (else 3))") (3)
     testNil(globalEnv, "(cond (false 1) (false 2))")
   }
 
