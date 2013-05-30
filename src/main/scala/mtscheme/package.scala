@@ -2,10 +2,10 @@ package object mtscheme {
 
   // Is this kosher?
 
-  type Env = List[EnvMap]
-  type EnvMap = Map[String,Expression]
+  type EnvT = List[EnvMapT]
+  type EnvMapT = Map[String,ExprT]
 
-  def Env() = List(EnvMap())
-  def Env(xs: EnvMap*) = List(xs:_*)
-  def EnvMap(xs: (String, Expression)*) = Map(xs:_*)
+  def EnvT() = List(EnvMapT())
+  def EnvT(xs: EnvMapT*) = List(xs:_*)
+  def EnvMapT(xs: (String, ExprT)*) = Map(xs:_*)
 }

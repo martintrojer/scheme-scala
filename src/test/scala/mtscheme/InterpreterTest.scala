@@ -10,27 +10,27 @@ class InterpreterTest extends FunSuite {
 
   // TODO; extractors to remove duplication?
 
-  def getNumResult(env: Environment, expr: Expression) = eval(env, expr)._2 match {
+  def getNumResult(env: Env, expr: ExprT) = eval(env, expr)._2 match {
       case Value(Num(n))  => n
       case _              => throw new IllegalArgumentException("expression failure")
   }
 
-  def getBoolResult(env: Environment, expr: Expression) = eval(env, expr)._2 match {
+  def getBoolResult(env: Env, expr: ExprT) = eval(env, expr)._2 match {
     case Value(Bool(n)) => n
     case _              => throw new IllegalArgumentException("expression failure")
   }
 
-  def getEnv(env: Environment, exprS: String) = eval(env, parse(exprS).head)._1
+  def getEnv(env: Env, exprS: String) = eval(env, parse(exprS).head)._1
 
-  def testNumber(env: Environment, exprS: String, correct: BigDecimal) = {
+  def testNumber(env: Env, exprS: String, correct: BigDecimal) = {
     expectResult(correct) { getNumResult(env, parse(exprS).head) }
   }
 
-  def testBool(env: Environment, exprS: String, correct: Boolean) = {
+  def testBool(env: Env, exprS: String, correct: Boolean) = {
     expectResult(correct) { getBoolResult(env, parse(exprS).head) }
   }
 
-  def testNil(env: Environment, exprS: String) = {
+  def testNil(env: Env, exprS: String) = {
     expectResult(NullExpr()) { eval(env, parse(exprS).head)._2 }
   }
 

@@ -1,7 +1,7 @@
 package mtscheme
 
 // ----------------------------------------
-// Case Types
+// Case classes
 
 sealed trait Token
 case class TOpen() extends Token
@@ -68,10 +68,10 @@ object Parser {
       case TSymbol(s)     => Symbol(s)
       case _              => throw new IllegalArgumentException("syntax error")
     }
-    def doParse(acc: List[Expression], toks: List[Token]): (List[Expression], List[Token]) = toks match {
+    def doParse(acc: List[ExprT], toks: List[Token]): (List[ExprT], List[Token]) = toks match {
       case TOpen() :: t   => {
         val (e, rst) = doParse(List(), t)
-        doParse(Combination(e) :: acc, rst)
+        doParse(Comb(e) :: acc, rst)
       }
       case TClose() :: t  => (acc.reverse, t)
       case h :: t         => doParse(mapTok(h) :: acc, t)

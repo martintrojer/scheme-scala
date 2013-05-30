@@ -5,7 +5,7 @@ import mtscheme.Interpreter._
 object BuiltIn {
 
   def aritFun(op: ((BigDecimal, BigDecimal) => BigDecimal))
-             (env: Environment, comb: List[Expression]) = {
+             (env: Env, comb: List[ExprT]) = {
     val error = new IllegalArgumentException("arithmetic error")
     comb.map(e => eval(env, e)._2) match {
       case Value(Num(first)) :: t =>
@@ -17,20 +17,20 @@ object BuiltIn {
   }
 
   def combFun(op: ((BigDecimal, BigDecimal) => Boolean))
-             (env: Environment, comb: List[Expression]) = {
+             (env: Env, comb: List[ExprT]) = {
     val error = new IllegalArgumentException("comparison error")
     comb.map(e => eval(env, e)._2) match {
       case Value(Num(first)) :: t =>
         val res = t.foldLeft((true, first))((acc, e) => e match {
-          case Value(Num(v)) => (acc._1 && op(acc._2, v), v)
-          case _ => throw error })
+          case Value(Num(v))  => (acc._1 && op(acc._2, v), v)
+          case _              => throw error })
         (env,Value(Bool(res._1)))
       case _                      => throw error
     }
   }
 
-  // build a list of LValues from a Combination of Symbols
-  def buildList(comb: List[Expression]): List[ListType] = comb match {
+  // build a list of LValues from a Comb of Symbols
+  def buildList(comb: List[ExprT]): List[ListT] = comb match {
     case List()         => List()
     case Symbol(n) :: t => LValue(Name(n)) :: buildList(t)
     case Value(v) :: t  => LValue(v) :: buildList(t)
@@ -39,7 +39,7 @@ object BuiltIn {
 
   // -------------------------------------------
 
-  def _not(env: Environment, comb: List[Expression]) = comb match {
+  def _not(env: Env, comb: List[ExprT]) = comb match {
     case expr :: Nil  => eval(env, expr) match {
       case (_, Value(Bool(v)))  => (env, Value(Bool(!v)))
       case _                    => throw new IllegalArgumentException("not")
@@ -47,7 +47,7 @@ object BuiltIn {
     case _            => throw new IllegalArgumentException("not")
   }
 
-  def _if(env: Environment, comb: List[Expression]) = {
+  def _if(env: Env, comb: List[ExprT]) = {
     val error = new IllegalArgumentException("if")
     val (condExpr, posExpr, negExpr) = comb match {
       case condExpr :: posExpr :: negExpr :: Nil  =>
@@ -68,10 +68,10 @@ object BuiltIn {
      }
   }
 
-  def _cond(env: Environment, comb: List[Expression]) = {
+  def _cond(env: Env, comb: List[ExprT]) = {
     val error = new IllegalArgumentException("cond")
 
-    def doExpr(comb: List[Expression]) = comb match {
+    def doExpr(comb: List[ExprT]) = comb match {
       case Symbol("else") :: posExpr :: Nil =>
         Some(eval(env, posExpr)._2)
       case condExpr :: posExpr :: Nil       => eval(env, condExpr)._2 match {
@@ -82,20 +82,20 @@ object BuiltIn {
       case _                                => throw error
     }
 
-    def runExprs(comb: List[Expression]): Expression = comb match {
-      case Combination(c) :: rest   => doExpr(c) match {
+    def runExprs(comb: List[ExprT]): ExprT = comb match {
+      case Comb(c) :: rest  => doExpr(c) match {
         case Some(e)    => e
         case None       => runExprs(rest)
       }
-      case _                        => NullExpr()
+      case _                => NullExpr()
     }
 
     (env, runExprs(comb))
   }
 
-  def _define(env: Environment, comb: List[Expression]) = {
+  def _define(env: Env, comb: List[ExprT]) = {
     val error = new IllegalArgumentException("define")
-    def getStr(expr: Expression) = expr match {
+    def getStr(expr: ExprT) = expr match {
       case Symbol(n)      => n
       case Value(Name(n)) => n
       case _              => throw error
@@ -107,10 +107,10 @@ object BuiltIn {
         (env.addEntry(n -> res), NullExpr())
       }
       // function definition
-      case Combination(ns) :: body    => {
+      case Comb(ns) :: body           => {
         val fname = getStr(ns.head)
         val args = buildList(ns.tail)
-        (env.addEntry(fname -> Function(args, body)), NullExpr())
+        (env.addEntry(fname -> Func(args, body)), NullExpr())
       }
       case _                          => throw error
     }
@@ -118,24 +118,24 @@ object BuiltIn {
 
   // -------------------------------------------
 
-  val globalEnv = Environment(Env(EnvMap(
-                      ("+" -> Procedure(aritFun(_+_) _)),
-                      ("-" -> Procedure(aritFun(_-_) _)),
-                      ("*" -> Procedure(aritFun(_*_) _)),
-                      ("/" -> Procedure(aritFun(_/_) _)),
+  val globalEnv = Env(EnvT(EnvMapT(
+                      ("+" -> Proc(aritFun(_+_) _)),
+                      ("-" -> Proc(aritFun(_-_) _)),
+                      ("*" -> Proc(aritFun(_*_) _)),
+                      ("/" -> Proc(aritFun(_/_) _)),
 
-                      ("=" -> Procedure(combFun(_==_) _)),
-                      (">" -> Procedure(combFun(_>_) _)),
-                      ("<" -> Procedure(combFun(_<_) _)),
-                      (">=" -> Procedure(combFun(_>=_) _)),
-                      ("<=" -> Procedure(combFun(_<=_) _)),
+                      ("=" -> Proc(combFun(_==_) _)),
+                      (">" -> Proc(combFun(_>_) _)),
+                      ("<" -> Proc(combFun(_<_) _)),
+                      (">=" -> Proc(combFun(_>=_) _)),
+                      ("<=" -> Proc(combFun(_<=_) _)),
 
                       ("true" -> Value(Bool(true))),
                       ("false" -> Value(Bool(false))),
 
-                      ("not" -> Procedure(_not)),
-                      ("if" -> Procedure(_if)),
-                      ("cond" -> Procedure(_cond)),
-                      ("define" -> Procedure(_define))
+                      ("not" -> Proc(_not)),
+                      ("if" -> Proc(_if)),
+                      ("cond" -> Proc(_cond)),
+                      ("define" -> Proc(_define))
     )))
 }

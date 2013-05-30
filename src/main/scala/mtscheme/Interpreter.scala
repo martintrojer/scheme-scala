@@ -1,73 +1,73 @@
 package mtscheme
 
 // ----------------------------------------
-// Case Types
+// Case classes
 
-sealed trait ValueType
-case class Num(v: BigDecimal) extends ValueType
-case class Bool(v: Boolean) extends ValueType
-case class Name(v: String) extends ValueType
+sealed trait ValueT
+case class Num(v: BigDecimal) extends ValueT
+case class Bool(v: Boolean) extends ValueT
+case class Name(v: String) extends ValueT
 
-sealed trait ListType
-case class LValue(v: ValueType) extends ListType
-case class LList(v: ListType) extends ListType
+sealed trait ListT
+case class LValue(v: ValueT) extends ListT
+case class LList(v: List[ListT]) extends ListT
 
-sealed trait Expression
-case class NullExpr() extends Expression
-case class Combination(v: List[Expression]) extends Expression
-case class EList(v: List[ListType]) extends Expression
-case class Function(args: List[ListType], body: List[Expression]) extends Expression
-case class Procedure(f: ((Environment, List[Expression]) => (Environment, Expression))) extends Expression
-case class Symbol(v: String) extends Expression
-case class Value(v: ValueType) extends Expression
+sealed trait ExprT
+case class NullExpr() extends ExprT
+case class Comb(v: List[ExprT]) extends ExprT
+case class EList(v: List[ListT]) extends ExprT
+case class Func(args: List[ListT], body: List[ExprT]) extends ExprT
+case class Proc(f: ((Env, List[ExprT]) => (Env, ExprT))) extends ExprT
+case class Symbol(v: String) extends ExprT
+case class Value(v: ValueT) extends ExprT
 
 // ----------------------------------------
 
 object Interpreter {
 
-  def eval(env: Environment, expr: Expression): (Environment, Expression) = expr match {
-    case NullExpr()           => throw new IllegalStateException("invalid interpreter state")
-    case Combination(List())  => throw new IllegalStateException("invalid combination")
-    case Combination(h :: t)  =>
+  def eval(env: Env, expr: ExprT): (Env, ExprT) = expr match {
+    case NullExpr()       => throw new IllegalStateException("invalid interpreter state")
+    case Comb(List())     => throw new IllegalStateException("invalid combination")
+    case Comb(h :: t)     =>
       eval(env, h) match {
-        case (nenv, Procedure(f))           => apply(f, t, env)
-        case (nenv, Function(args, body))   => {
+        case (_, Proc(f))             => apply(f, t, env)
+        case (nEnv, Func(args, body)) => {
           if (args.length != t.length) throw new IllegalArgumentException("invalid number or arguments")
-          val newEnv = (args zip t).foldLeft(nenv.expand())((acc, av) => bindArg(acc, av._1, av._2))
+          val newEnv = (args zip t).foldLeft(nEnv.expand())((acc, av) => bindArg(acc, av._1, av._2))
           evalAll(newEnv, body)
         }
-        case (nenv, expr)                   => (nenv, expr)
+        case (nEnv, expr)             => (nEnv, expr)
       }
-    case Procedure(f)         => (env, Procedure(f))
-    case Function(args, body) => throw new IllegalArgumentException("invalid function call")
-    case v @ Value(_)         => (env, v)
-    case l @ List(_)          => (env, l)
-    case Symbol(s)            =>
+    case Proc(f)          => (env, Proc(f))
+    case Func(args, body) => throw new IllegalArgumentException("invalid function call")
+    case v @ Value(_)     => (env, v)
+    case l @ List(_)      => (env, l)
+    case Symbol(s)        =>
       env.lookUp(s) match {
-        case Some(e)    => (env, e)
-        case None       => throw new IllegalArgumentException("unbound symbol '" + s +"'")
+        case Some(e)  => (env, e)
+        case None     => throw new IllegalArgumentException("unbound symbol '" + s +"'")
     }
   }
 
-  private def apply(f: ((Environment, List[Expression]) => (Environment, Expression)),
-                    args: List[Expression], env: Environment) =
+  private def apply(f: ((Env, List[ExprT]) => (Env, ExprT)),
+                    args: List[ExprT], env: Env) =
     f(env, args)
 
   // bind argument in a new environment
-  private def bindArg(env: Environment, arg: ListType, expr: Expression) = arg match {
+  private def bindArg(env: Env, arg: ListT, expr: ExprT) = arg match {
     case LValue(Name(n)) => env.addEntry(n -> eval(env, expr)._2)
     case _               => throw new IllegalArgumentException
   }
 
   // Eval a combination (a list of expressions), return the value of the last one
-  private def evalAll(env: Environment, comb: List[Expression]): (Environment, Expression) = comb match {
+  private def evalAll(env: Env, comb: List[ExprT]): (Env, ExprT) = comb match {
     case List() => (env, NullExpr())
     case h :: t => {
-      val (nenv, res) = eval(env, h)
+      val (nEnv, res) = eval(env, h)
       t.length match {
         case 0 => (env, res)
-        case 1 => eval(nenv, t.head)
-        case _ => evalAll(nenv, t)
+        case 1 => eval(nEnv, t.head)
+        case _ => evalAll(nEnv, t)
       }
     }
   }

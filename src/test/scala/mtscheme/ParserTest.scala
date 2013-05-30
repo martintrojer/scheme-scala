@@ -31,7 +31,7 @@ class ParserTest extends FunSuite {
   }
 
   test("Parse OpenClose") {
-    expectResult(List(Combination(List()))) {
+    expectResult(List(Comb(List()))) {
       parse("()")
     }
   }
@@ -43,7 +43,7 @@ class ParserTest extends FunSuite {
   }
 
   test("Parse Expr") {
-    expectResult(List(Combination(List(Symbol("+"), Value(Num(1.0)), Value(Num(2.0)))))) {
+    expectResult(List(Comb(List(Symbol("+"), Value(Num(1.0)), Value(Num(2.0)))))) {
       parse("(+ 1 2")
     }
   }

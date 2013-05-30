@@ -2,14 +2,14 @@ package mtscheme
 
 import org.scalatest.FunSuite
 
-class EnvironmentTest extends FunSuite {
+class EnvTest extends FunSuite {
 
   val entry = ("foo" -> Value(Num(1)))
-  val testEnv = Environment().addEntry(entry)
+  val testEnv = Env().addEntry(entry)
 
   test("addEntry") {
-    val resEnv = Environment(Env(EnvMap(entry)))
-    expectResult(resEnv) { Environment().addEntry(entry) }
+    val resEnv = Env(EnvT(EnvMapT(entry)))
+    expectResult(resEnv) { Env().addEntry(entry) }
   }
 
   test("simple lookup") {
