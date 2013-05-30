@@ -20,7 +20,7 @@ class InterpreterTest extends FunSuite {
     case _              => throw new IllegalArgumentException("bool expression failure")
   }
 
-  def getListResult(env: Env, expr: ExprT) = eval(env, expr)._2 match {
+  def getEListResult(env: Env, expr: ExprT) = eval(env, expr)._2 match {
     case EList(l)       => l
     case _              => throw new IllegalArgumentException("list expression failure")
   }
@@ -39,13 +39,13 @@ class InterpreterTest extends FunSuite {
     expectResult(NullExpr()) { eval(env, parse(exprS).head)._2 }
   }
 
-  def testList(env: Env, exprS: String, correct: List[ExprT]) = {
-    expectResult(correct) { getListResult(env, parse(exprS).head) }
+  def testEList(env: Env, exprS: String, correct: List[ExprT]) = {
+    expectResult(correct) { getEListResult(env, parse(exprS).head) }
   }
 
   def testNumberG = (testNumber _).curried(globalEnv)
   def testBoolG = (testBool _).curried(globalEnv)
-  def testListG = (testList _).curried(globalEnv)
+  def testEListG = (testEList _).curried(globalEnv)
   def testNilG = (testNil _).curried(globalEnv)
 
   // ------------------------------------------
@@ -148,13 +148,20 @@ class InterpreterTest extends FunSuite {
   }
 
   test("cons") {
-    testListG("(cons 1 2)")                   (List (Value(Num(1)), Value(Num(2))))
-    testListG("(cons 1 (cons 2 3))")          (List (Value(Num(1)), Value(Num(2)), Value(Num(3))))
-    testListG("(cons 1 (cons 2 (cons 3 4)))") (List (Value(Num(1)), Value(Num(2)), Value(Num(3)),
+    testEListG("(cons 1 2)")                   (List (Value(Num(1)), Value(Num(2))))
+    testEListG("(cons 1 (cons 2 3))")          (List (Value(Num(1)), Value(Num(2)), Value(Num(3))))
+    testEListG("(cons 1 (cons 2 (cons 3 4)))") (List (Value(Num(1)), Value(Num(2)), Value(Num(3)),
       Value(Num(4))))
-    testListG("(cons (cons 1 2) 3)")          (List (EList(List(Value(Num(1)), Value(Num(2)))),
+    testEListG("(cons (cons 1 2) 3)")          (List (EList(List(Value(Num(1)), Value(Num(2)))),
       Value(Num(3))))
-    testListG("(cons \"kalle\" 2)")           (List (Value(Name("kalle")), Value(Num(2))))
+    testEListG("(cons \"kalle\" 2)")           (List (Value(Name("kalle")), Value(Num(2))))
   }
 
+  test("list") {
+    testEListG("(list 1 2)")              (List(Value(Num(1)), Value(Num(2))))
+    testEListG("(list 5 (list 1 1) 2)")   (List(Value(Num(5)), EList(List(Value(Num(1)), Value(Num(1)))), Value(Num(2))))
+    testEListG("(list 1 \"kalle\")")      (List(Value(Num(1)), Value(Name("kalle"))))
+    testEListG("(list)")                  (List())
+
+  }
 }

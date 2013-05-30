@@ -116,7 +116,7 @@ object BuiltIn {
     }
   }
 
-  def _cons(env: Env, comb: List[ExprT]): (Env, ExprT) = comb match {
+  def _cons(env: Env, comb: List[ExprT]) = comb match {
     case e1 :: e2 :: Nil  =>
       (eval(env, e1)._2, eval(env, e2)._2) match {
         case (expr1, NullExpr())   =>
@@ -127,6 +127,14 @@ object BuiltIn {
           (env, EList(List(expr1, expr2)))
       }
     case _                => throw new IllegalArgumentException("cons")
+  }
+
+  def _list(env: Env, comb: List[ExprT]) = {
+    def doExpr(comb: List[ExprT]): List[ExprT] = comb match {
+      case List()   => Nil
+      case h :: t   => eval(env,h)._2 :: doExpr(t)
+    }
+    (env, EList(doExpr(comb)))
   }
 
   // -------------------------------------------
@@ -148,6 +156,7 @@ object BuiltIn {
                       ("cond" ->    Proc(_cond)),
                       ("define" ->  Proc(_define)),
                       ("cons" ->    Proc(_cons)),
+                      ("list" ->    Proc(_list)),
 
                       ("true" ->    Value(Bool(true))),
                       ("false" ->   Value(Bool(false)))
