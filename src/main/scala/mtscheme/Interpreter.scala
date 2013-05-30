@@ -8,15 +8,11 @@ case class Num(v: BigDecimal) extends ValueT
 case class Bool(v: Boolean) extends ValueT
 case class Name(v: String) extends ValueT
 
-sealed trait ListT
-case class LValue(v: ValueT) extends ListT
-case class LList(v: List[ListT]) extends ListT
-
 sealed trait ExprT
 case class NullExpr() extends ExprT
 case class Comb(v: List[ExprT]) extends ExprT
-case class EList(v: List[ListT]) extends ExprT
-case class Func(args: List[ListT], body: List[ExprT]) extends ExprT
+case class EList(v: List[ExprT]) extends ExprT
+case class Func(args: List[ValueT], body: List[ExprT]) extends ExprT
 case class Proc(f: ((Env, List[ExprT]) => (Env, ExprT))) extends ExprT
 case class Symbol(v: String) extends ExprT
 case class Value(v: ValueT) extends ExprT
@@ -54,9 +50,9 @@ object Interpreter {
     f(env, args)
 
   // bind argument in a new environment
-  private def bindArg(env: Env, arg: ListT, expr: ExprT) = arg match {
-    case LValue(Name(n)) => env.addEntry(n -> eval(env, expr)._2)
-    case _               => throw new IllegalArgumentException
+  private def bindArg(env: Env, arg: ValueT, expr: ExprT) = arg match {
+    case Name(n)  => env.addEntry(n -> eval(env, expr)._2)
+    case _        => throw new IllegalArgumentException
   }
 
   // Eval a combination (a list of expressions), return the value of the last one

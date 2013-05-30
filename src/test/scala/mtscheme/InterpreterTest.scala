@@ -12,12 +12,17 @@ class InterpreterTest extends FunSuite {
 
   def getNumResult(env: Env, expr: ExprT) = eval(env, expr)._2 match {
       case Value(Num(n))  => n
-      case _              => throw new IllegalArgumentException("expression failure")
+      case _              => throw new IllegalArgumentException("num expression failure")
   }
 
   def getBoolResult(env: Env, expr: ExprT) = eval(env, expr)._2 match {
     case Value(Bool(n)) => n
-    case _              => throw new IllegalArgumentException("expression failure")
+    case _              => throw new IllegalArgumentException("bool expression failure")
+  }
+
+  def getListResult(env: Env, expr: ExprT) = eval(env, expr)._2 match {
+    case EList(l)       => l
+    case _              => throw new IllegalArgumentException("list expression failure")
   }
 
   def getEnv(env: Env, exprS: String) = eval(env, parse(exprS).head)._1
@@ -34,8 +39,14 @@ class InterpreterTest extends FunSuite {
     expectResult(NullExpr()) { eval(env, parse(exprS).head)._2 }
   }
 
-  val testNumberG = (testNumber _).curried(globalEnv)
-  val testBoolG = (testBool _).curried(globalEnv)
+  def testList(env: Env, exprS: String, correct: List[ExprT]) = {
+    expectResult(correct) { getListResult(env, parse(exprS).head) }
+  }
+
+  def testNumberG = (testNumber _).curried(globalEnv)
+  def testBoolG = (testBool _).curried(globalEnv)
+  def testListG = (testList _).curried(globalEnv)
+  def testNilG = (testNil _).curried(globalEnv)
 
   // ------------------------------------------
 
@@ -121,19 +132,18 @@ class InterpreterTest extends FunSuite {
     testNumberG("(if (< 2 1) 10 11)")               (11)
     testNumberG("(if (< (+ 1 1 1) 1) 11 (* 2 5))")  (10)
     testNumberG("(if true 1)")                      (1)
-    testNil(globalEnv, "(if false 1)")
+    testNilG("(if false 1)")
   }
 
   test("cond") {
     testNumberG("(cond (true 1) ((= 1 2) 2))")      (1)
     testNumberG("(cond ((= 1 2) 1) (true 2))")      (2)
     testNumberG("(cond (false 1) (false 2) (else 3))") (3)
-    testNil(globalEnv, "(cond (false 1) (false 2))")
+    testNilG("(cond (false 1) (false 2))")
   }
 
   test("define") {
     expectResult(Some(Value(Num(4)))) { getEnv(globalEnv, "(define lisa 4)").lookUp("lisa") }
     expectResult(Some(Value(Num(3)))) { getEnv(globalEnv, "(define nisse (+ 1 1 1))").lookUp("nisse") }
   }
-
 }

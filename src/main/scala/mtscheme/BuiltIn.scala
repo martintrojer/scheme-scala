@@ -30,10 +30,10 @@ object BuiltIn {
   }
 
   // build a list of LValues from a Comb of Symbols
-  def buildList(comb: List[ExprT]): List[ListT] = comb match {
+  def buildList(comb: List[ExprT]): List[ValueT] = comb match {
     case List()         => List()
-    case Symbol(n) :: t => LValue(Name(n)) :: buildList(t)
-    case Value(v) :: t  => LValue(v) :: buildList(t)
+    case Symbol(n) :: t => Name(n) :: buildList(t)
+    case Value(v) :: t  => v :: buildList(t)
     case _              => throw new IllegalArgumentException("define args")
   }
 
@@ -119,23 +119,24 @@ object BuiltIn {
   // -------------------------------------------
 
   val globalEnv = Env(EnvT(EnvMapT(
-                      ("+" -> Proc(aritFun(_+_) _)),
-                      ("-" -> Proc(aritFun(_-_) _)),
-                      ("*" -> Proc(aritFun(_*_) _)),
-                      ("/" -> Proc(aritFun(_/_) _)),
+                      ("+" ->       Proc(aritFun(_+_) _)),
+                      ("-" ->       Proc(aritFun(_-_) _)),
+                      ("*" ->       Proc(aritFun(_*_) _)),
+                      ("/" ->       Proc(aritFun(_/_) _)),
 
-                      ("=" -> Proc(combFun(_==_) _)),
-                      (">" -> Proc(combFun(_>_) _)),
-                      ("<" -> Proc(combFun(_<_) _)),
-                      (">=" -> Proc(combFun(_>=_) _)),
-                      ("<=" -> Proc(combFun(_<=_) _)),
+                      ("=" ->       Proc(combFun(_==_) _)),
+                      (">" ->       Proc(combFun(_>_) _)),
+                      ("<" ->       Proc(combFun(_<_) _)),
+                      (">=" ->      Proc(combFun(_>=_) _)),
+                      ("<=" ->      Proc(combFun(_<=_) _)),
 
-                      ("true" -> Value(Bool(true))),
-                      ("false" -> Value(Bool(false))),
+                      ("not" ->     Proc(_not)),
+                      ("if" ->      Proc(_if)),
+                      ("cond" ->    Proc(_cond)),
+                      ("define" ->  Proc(_define)),
 
-                      ("not" -> Proc(_not)),
-                      ("if" -> Proc(_if)),
-                      ("cond" -> Proc(_cond)),
-                      ("define" -> Proc(_define))
-    )))
+                      ("true" ->    Value(Bool(true))),
+                      ("false" ->   Value(Bool(false)))
+
+  )))
 }
