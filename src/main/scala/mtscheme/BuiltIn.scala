@@ -116,6 +116,19 @@ object BuiltIn {
     }
   }
 
+  def _cons(env: Env, comb: List[ExprT]): (Env, ExprT) = comb match {
+    case e1 :: e2 :: Nil  =>
+      (eval(env, e1)._2, eval(env, e2)._2) match {
+        case (expr1, NullExpr())   =>
+          (env, EList(List(expr1)))
+        case (expr1, EList(l2))   =>
+          (env, EList(expr1 :: l2))
+        case (expr1, expr2) =>
+          (env, EList(List(expr1, expr2)))
+      }
+    case _                => throw new IllegalArgumentException("cons")
+  }
+
   // -------------------------------------------
 
   val globalEnv = Env(EnvT(EnvMapT(
@@ -134,6 +147,7 @@ object BuiltIn {
                       ("if" ->      Proc(_if)),
                       ("cond" ->    Proc(_cond)),
                       ("define" ->  Proc(_define)),
+                      ("cons" ->    Proc(_cons)),
 
                       ("true" ->    Value(Bool(true))),
                       ("false" ->   Value(Bool(false)))

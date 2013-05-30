@@ -146,4 +146,15 @@ class InterpreterTest extends FunSuite {
     expectResult(Some(Value(Num(4)))) { getEnv(globalEnv, "(define lisa 4)").lookUp("lisa") }
     expectResult(Some(Value(Num(3)))) { getEnv(globalEnv, "(define nisse (+ 1 1 1))").lookUp("nisse") }
   }
+
+  test("cons") {
+    testListG("(cons 1 2)")                   (List (Value(Num(1)), Value(Num(2))))
+    testListG("(cons 1 (cons 2 3))")          (List (Value(Num(1)), Value(Num(2)), Value(Num(3))))
+    testListG("(cons 1 (cons 2 (cons 3 4)))") (List (Value(Num(1)), Value(Num(2)), Value(Num(3)),
+      Value(Num(4))))
+    testListG("(cons (cons 1 2) 3)")          (List (EList(List(Value(Num(1)), Value(Num(2)))),
+      Value(Num(3))))
+    testListG("(cons \"kalle\" 2)")           (List (Value(Name("kalle")), Value(Num(2))))
+  }
+
 }
