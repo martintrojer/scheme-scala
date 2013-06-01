@@ -20,7 +20,7 @@ null
 6
 > (define (map f l) (if (not (null? l)) (cons (f (car l)) (map f (cdr l)))))
 null
-> > (map (lambda (x) (* x x)) (list 1 2 3))
+> (map (lambda (x) (* x x)) (list 1 2 3))
 (1, 4, 9, )
 ```
 
