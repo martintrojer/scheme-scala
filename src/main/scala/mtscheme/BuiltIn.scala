@@ -37,6 +37,17 @@ object BuiltIn {
     case _              => throw new IllegalArgumentException("define args")
   }
 
+  def listToString(ls: List[ExprT]) = {
+    def ltos(ls: List[ExprT]): String = ls match {
+      case List()   => ""
+      case Value(Num(v)) :: t   => v.toString + ", " + ltos(t)
+      case Value(Bool(v)) :: t  => v.toString + ", " + ltos(t)
+      case Value(Name(v)) :: t  => v.toString + ", " + ltos(t)
+      case EList(l) :: t        => "(" + ltos(l) + "), " + ltos(t)
+      case _ :: t               => ltos(t)
+    }
+  }
+
   // -------------------------------------------
 
   def _not(env: Env, comb: List[ExprT]) = comb match {
@@ -200,6 +211,28 @@ object BuiltIn {
     case _                  => throw new IllegalArgumentException("lambda")
   }
 
+  def _display(env: Env, comb: List[ExprT]) = {
+    comb match {
+      case expr :: Nil  => (eval(env, expr)._2) match {
+        case Value(Num(v))    => println(v)
+        case Value(Name(v))   => println(v)
+        case Value(Bool(v))   => println(v)
+        case EList(l)         => println(listToString(l))
+        case _                => throw new IllegalArgumentException("display")
+      }
+      case _            => throw new IllegalArgumentException("display")
+    }
+    (env, NullExpr())
+  }
+
+  def _newline(env: Env, comb: List[ExprT]) = {
+    comb match {
+      case List()   => println()
+      case _        => throw new IllegalArgumentException("newline")
+    }
+    (env, NullExpr())
+  }
+
   // -------------------------------------------
 
   val globalEnv = Env(EnvT(EnvMapT(
@@ -227,6 +260,8 @@ object BuiltIn {
                       ("let" ->     Proc(_let)),
                       ("begin" ->   Proc(_begin)),
                       ("lambda" ->  Proc(_lambda)),
+                      ("display" -> Proc(_display)),
+                      ("newline" -> Proc(_newline)),
 
                       ("true" ->    Value(Bool(true))),
                       ("false" ->   Value(Bool(false)))
