@@ -182,4 +182,12 @@ class InterpreterTest extends FunSuite {
     testEListG("(cdr (list (list 1)))")   (List())
   }
 
+  test("null?") {
+    testBoolG("(null? (list 1))")         (List(1).isEmpty)
+    testBoolG("(null? (cdr (list 1)))")   (List(1).tail.isEmpty)
+    testBoolG("(null? (cdr (cdr (list 1))))") (true)
+    testBoolG("(null? (list))")           (List().isEmpty)
+  }
+
+
 }
