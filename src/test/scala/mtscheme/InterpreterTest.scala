@@ -189,5 +189,10 @@ class InterpreterTest extends FunSuite {
     testBoolG("(null? (list))")           (List().isEmpty)
   }
 
+  test("let") {
+    testNumberG("(let ((a 1)) a")         (1)
+    testNumberG("(let ((a 1)(b (+ 1 1))) (+ a b)") (3)
+  }
+
 
 }

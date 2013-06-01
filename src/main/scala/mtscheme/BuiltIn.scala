@@ -173,6 +173,26 @@ object BuiltIn {
     case _          => throw new IllegalArgumentException("null?")
   }
 
+  def _let(env: Env, comb: List[ExprT]) = {
+    val error = new IllegalArgumentException("let")
+    def doBind(acc: Env, binds: List[ExprT]): Env = binds match {
+      case List()         =>
+        acc
+      case Comb(c) :: t   => c match {
+        case Symbol(v) :: expr :: Nil =>
+          doBind(acc.addEntry(v -> eval(env, expr)._2), t)
+        case _                        => throw error
+      }
+      case _              => throw error
+    }
+    comb match {
+      case Comb(binds) :: body :: Nil =>
+        val newEnv = doBind(env.expand(), binds)
+        eval(newEnv, body)
+      case _                          => throw error
+    }
+  }
+
   // -------------------------------------------
 
   val globalEnv = Env(EnvT(EnvMapT(
@@ -197,6 +217,7 @@ object BuiltIn {
                       ("car" ->     Proc(_car)),
                       ("cdr" ->     Proc(_cdr)),
                       ("null?" ->   Proc(_null)),
+                      ("let" ->     Proc(_let)),
 
                       ("true" ->    Value(Bool(true))),
                       ("false" ->   Value(Bool(false)))
