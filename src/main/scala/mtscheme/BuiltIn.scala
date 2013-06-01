@@ -46,6 +46,7 @@ object BuiltIn {
       case EList(l) :: t        => "(" + ltos(l) + "), " + ltos(t)
       case _ :: t               => ltos(t)
     }
+    "(" + ltos(ls) + ")"
   }
 
   // -------------------------------------------

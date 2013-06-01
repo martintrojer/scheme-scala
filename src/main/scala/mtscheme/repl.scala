@@ -8,13 +8,14 @@ object repl extends App {
 
   def commandLoop(env: Env, res: ExprT): Unit = {
     res match {
-      case Value(Num(v))    => println(v + "\n> ")
-      case Value(Name(v))   => println(v + "\n> ")
-      case Value(Bool(v))   => println(v + "\n> ")
-      case EList(l)         => println(listToString(l) + "\n> ")
-      case _                => println("null \n> ")
+      case Value(Num(v))    => println(v)
+      case Value(Name(v))   => println(v)
+      case Value(Bool(v))   => println(v)
+      case EList(l)         => println(listToString(l))
+      case _                => println("null")
     }
     try {
+      print("> ")
       val line = readLine()
       (commandLoop _).tupled(eval(env, parse(line).head))
     } catch {

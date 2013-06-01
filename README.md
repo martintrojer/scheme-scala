@@ -11,7 +11,22 @@ http://www.gnu.org/software/kawa/
 
 ## Usage
 
-TBD
+```
+$ sbt run
+[info] Running mtscheme.repl
+mtscheme v0.1
+null
+> (+ 1 2 3)
+6
+> (define (map f l) (if (not (null? l)) (cons (f (car l)) (map f (cdr l)))))
+null
+> > (map (lambda (x) (* x x)) (list 1 2 3))
+(1, 4, 9, )
+```
+
+## Tests
+
+```$ sbt test```
 
 ## License
 
