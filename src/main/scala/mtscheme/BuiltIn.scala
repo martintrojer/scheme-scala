@@ -132,7 +132,18 @@ object BuiltIn {
   def _list(env: Env, comb: List[ExprT]) = {
     def doExpr(comb: List[ExprT]): List[ExprT] = comb match {
       case List()   => Nil
-      case h :: t   => eval(env,h)._2 :: doExpr(t)
+      case h :: t   => eval(env, h)._2 :: doExpr(t)
+    }
+    (env, EList(doExpr(comb)))
+  }
+
+  def _append(env: Env, comb: List[ExprT]) = {
+    def doExpr(comb: List[ExprT]): List[ExprT] = comb match {
+      case List()   => Nil
+      case h :: t   => eval(env, h)._2 match {
+        case EList(l) => l ::: doExpr(t)
+        case expr     => expr :: doExpr(t)
+      }
     }
     (env, EList(doExpr(comb)))
   }
@@ -157,6 +168,7 @@ object BuiltIn {
                       ("define" ->  Proc(_define)),
                       ("cons" ->    Proc(_cons)),
                       ("list" ->    Proc(_list)),
+                      ("append" ->  Proc(_append)),
 
                       ("true" ->    Value(Bool(true))),
                       ("false" ->   Value(Bool(false)))
