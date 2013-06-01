@@ -104,7 +104,7 @@ object BuiltIn {
       // variable definition (lambda 'values' fall into this category)
       case Symbol(n) :: expr :: Nil   => {
         val (nenv, res) = eval(env, expr)
-        (env.addEntry(n -> res), NullExpr())
+        (nenv.addEntry(n -> res), NullExpr())
       }
       // function definition
       case Comb(ns) :: body           => {
@@ -195,6 +195,11 @@ object BuiltIn {
 
   def _begin(env: Env, comb: List[ExprT]) = evalAll(env, comb)
 
+  def _lambda(env: Env, comb: List[ExprT]) = comb match {
+    case Comb(args) :: body => (env, Func(buildList(args), body))
+    case _                  => throw new IllegalArgumentException("lambda")
+  }
+
   // -------------------------------------------
 
   val globalEnv = Env(EnvT(EnvMapT(
@@ -221,6 +226,7 @@ object BuiltIn {
                       ("null?" ->   Proc(_null)),
                       ("let" ->     Proc(_let)),
                       ("begin" ->   Proc(_begin)),
+                      ("lambda" ->  Proc(_lambda)),
 
                       ("true" ->    Value(Bool(true))),
                       ("false" ->   Value(Bool(false)))

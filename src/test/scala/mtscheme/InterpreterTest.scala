@@ -210,4 +210,14 @@ class InterpreterTest extends FunSuite {
     testNumber(e3, "(add 1 3)", 4)
   }
 
+  test("lambda") {
+    val e1 = getEnv(globalEnv, "(define (adder val) (lambda (x) (+ x val)))")
+    val e2 = getEnv(e1, "(define add4 (adder 4))")
+    testNumber(e2, "(add4 4", 8)
+
+    val e3 = getEnv(globalEnv, "(define (map f l) (if (not (null? l)) (cons (f (car l)) (map f (cdr l)))))")
+    testEList(e3, "(map (lambda (x) (* x x)) (list 1 2 3))",
+              List(Value(Num(1)), Value(Num(4)), Value(Num(9))))
+  }
+
 }
