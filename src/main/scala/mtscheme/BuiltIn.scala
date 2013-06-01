@@ -193,6 +193,8 @@ object BuiltIn {
     }
   }
 
+  def _begin(env: Env, comb: List[ExprT]) = evalAll(env, comb)
+
   // -------------------------------------------
 
   val globalEnv = Env(EnvT(EnvMapT(
@@ -218,6 +220,7 @@ object BuiltIn {
                       ("cdr" ->     Proc(_cdr)),
                       ("null?" ->   Proc(_null)),
                       ("let" ->     Proc(_let)),
+                      ("begin" ->   Proc(_begin)),
 
                       ("true" ->    Value(Bool(true))),
                       ("false" ->   Value(Bool(false)))

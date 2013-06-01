@@ -194,5 +194,20 @@ class InterpreterTest extends FunSuite {
     testNumberG("(let ((a 1)(b (+ 1 1))) (+ a b)") (3)
   }
 
+  test("begin") {
+    testNumberG("(begin 1 2)")            (2)
+    testNumberG("(begin (define x 2) x)") (2)
+  }
+
+  test("function") {
+    val e1 = getEnv(globalEnv, "(define (add a b) (+ a b))")
+    testNumber(e1, "(add 1 2", 3)
+
+    val e2 = getEnv(globalEnv, "(define (fact x) (if (= x 0) 1 (* x (fact (- x 1)))))")
+    testNumber(e2, "(fact (+ 5 5))", 3628800)
+
+    val e3 = getEnv(globalEnv, "(define (add a b) (begin (define (worker x y) (+ x y)) (worker a b)))")
+    testNumber(e3, "(add 1 3)", 4)
+  }
 
 }

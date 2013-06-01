@@ -56,7 +56,7 @@ object Interpreter {
   }
 
   // Eval a combination (a list of expressions), return the value of the last one
-  private def evalAll(env: Env, comb: List[ExprT]): (Env, ExprT) = comb match {
+  def evalAll(env: Env, comb: List[ExprT]): (Env, ExprT) = comb match {
     case List() => (env, NullExpr())
     case h :: t => {
       val (nEnv, res) = eval(env, h)
