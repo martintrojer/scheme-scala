@@ -148,6 +148,22 @@ object BuiltIn {
     (env, EList(doExpr(comb)))
   }
 
+  def _car(env: Env, comb: List[ExprT]) = comb match {
+    case h :: Nil   => eval(env, h)._2 match {
+      case EList(l)   => (env, l.head)
+      case _          => throw new IllegalArgumentException("car")
+    }
+    case _          => throw new IllegalArgumentException("car")
+  }
+
+  def _cdr(env: Env, comb: List[ExprT]) = comb match {
+    case h :: Nil   => eval(env, h)._2 match {
+      case EList(l)   => (env, EList(l.tail))
+      case _          => throw new IllegalArgumentException("car")
+    }
+    case _          => throw new IllegalArgumentException("car")
+  }
+
   // -------------------------------------------
 
   val globalEnv = Env(EnvT(EnvMapT(
@@ -169,6 +185,8 @@ object BuiltIn {
                       ("cons" ->    Proc(_cons)),
                       ("list" ->    Proc(_list)),
                       ("append" ->  Proc(_append)),
+                      ("car" ->     Proc(_car)),
+                      ("cdr" ->     Proc(_cdr)),
 
                       ("true" ->    Value(Bool(true))),
                       ("false" ->   Value(Bool(false)))

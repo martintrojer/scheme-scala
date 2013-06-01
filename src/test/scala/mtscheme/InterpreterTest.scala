@@ -169,4 +169,17 @@ class InterpreterTest extends FunSuite {
     testEListG("(append (list 1 2) (list 3 4)")   (List(Value(Num(1)), Value(Num(2)), Value(Num(3)), Value(Num(4))))
     testEListG("(append 1 (list 2 (list 3)))")   (List(Value(Num(1)), Value(Num(2)), EList(List(Value(Num(3))))))
   }
+
+  test("car") {
+    testNumberG("(car (list 1 2))")       (List(1,2).head)
+    testEListG("(car (list (list 1) 2))") (List(Value(Num(1))))
+  }
+
+  test("cdr") {
+    testEListG("(cdr (list 1))")          (List())
+    testEListG("(cdr (list 1 2))")        (List(Value(Num(2))))
+    testEListG("(cdr (list 1 (list 2 3)))") (List(EList(List(Value(Num(2)), Value(Num(3))))))
+    testEListG("(cdr (list (list 1)))")   (List())
+  }
+
 }
