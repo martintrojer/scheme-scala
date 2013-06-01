@@ -19,7 +19,7 @@ object repl extends App {
       val line = readLine()
       (commandLoop _).tupled(eval(env, parse(line).head))
     } catch {
-      case e: Exception => commandLoop(env, Value(Name(e.getMessage)))
+      case e: Exception => commandLoop(env, Value(Name("Error; " + e.getMessage)))
     }
   }
 
