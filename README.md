@@ -22,6 +22,16 @@ null
 null
 > (map (lambda (x) (* x x)) (list 1 2 3))
 (1, 4, 9, )
+>
+> (define (foreach f l) (if (not (null? l)) (begin (f (car l)) (foreach f (cdr l)))))
+null
+> (foreach display (list 1 "foo" 2 "bar"))
+1
+foo
+2
+bar
+null
+>
 ```
 
 ## Tests
