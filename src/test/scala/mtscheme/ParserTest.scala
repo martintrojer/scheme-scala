@@ -30,6 +30,11 @@ class ParserTest extends FunSuite {
     }
   }
 
+  test("Tokens Factional Number") {
+    expectResult(List(TNumber("3.14"))) { tokenize("3.14".toList)}
+  }
+
+
   test("Parse OpenClose") {
     expectResult(List(Comb(List()))) {
       parse("()")

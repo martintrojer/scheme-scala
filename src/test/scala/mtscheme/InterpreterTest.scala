@@ -54,7 +54,7 @@ class InterpreterTest extends FunSuite {
     testNumberG("(+ 1 2)")        (1+2)
     testNumberG("(+ 1 (+ 2 3))")  (1+2+3)
     testNumberG("(+ 1)")          (1)
-    testNumberG("(+ 1 1 1)")      (1+1+1)
+    testNumberG("(+ 1 1 1 0.14)") (1+1+1+0.14)
   }
 
   test("sub") {
