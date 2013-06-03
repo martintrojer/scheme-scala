@@ -1,7 +1,6 @@
 package mtscheme
 
 import org.scalatest.FunSuite
-
 import mtscheme.Interpreter._
 import mtscheme.Parser._
 import mtscheme.BuiltIn._
@@ -166,7 +165,7 @@ class InterpreterTest extends FunSuite {
 
   test("append") {
     testEListG("(append (list 1 2))")     (List(Value(Num(1)), Value(Num(2))))
-    testEListG("(append (list 1 2) (list 3 4)")   (List(Value(Num(1)), Value(Num(2)), Value(Num(3)), Value(Num(4))))
+    testEListG("(append (list 1 2) (list 3 4))")   (List(Value(Num(1)), Value(Num(2)), Value(Num(3)), Value(Num(4))))
     testEListG("(append 1 (list 2 (list 3)))")   (List(Value(Num(1)), Value(Num(2)), EList(List(Value(Num(3))))))
   }
 
@@ -190,8 +189,8 @@ class InterpreterTest extends FunSuite {
   }
 
   test("let") {
-    testNumberG("(let ((a 1)) a")         (1)
-    testNumberG("(let ((a 1)(b (+ 1 1))) (+ a b)") (3)
+    testNumberG("(let ((a 1)) a)")        (1)
+    testNumberG("(let ((a 1)(b (+ 1 1))) (+ a b))") (3)
   }
 
   test("begin") {
@@ -201,7 +200,7 @@ class InterpreterTest extends FunSuite {
 
   test("function") {
     val e1 = getEnv(globalEnv, "(define (add a b) (+ a b))")
-    testNumber(e1, "(add 1 2", 3)
+    testNumber(e1, "(add 1 2)", 3)
 
     val e2 = getEnv(globalEnv, "(define (fact x) (if (= x 0) 1 (* x (fact (- x 1)))))")
     testNumber(e2, "(fact (+ 5 5))", 3628800)
@@ -213,7 +212,7 @@ class InterpreterTest extends FunSuite {
   test("lambda") {
     val e1 = getEnv(globalEnv, "(define (adder val) (lambda (x) (+ x val)))")
     val e2 = getEnv(e1, "(define add4 (adder 4))")
-    testNumber(e2, "(add4 4", 8)
+    testNumber(e2, "(add4 4)", 8)
 
     val e3 = getEnv(globalEnv, "(define (map f l) (if (not (null? l)) (cons (f (car l)) (map f (cdr l)))))")
     testEList(e3, "(map (lambda (x) (* x x)) (list 1 2 3))",

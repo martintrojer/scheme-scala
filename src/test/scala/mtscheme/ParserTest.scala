@@ -2,9 +2,12 @@ package mtscheme
 
 import org.scalatest.FunSuite
 
-import mtscheme.Parser._
+import mtscheme.Parser.parse
+import mtscheme.HandRolledParser._
 
 class ParserTest extends FunSuite {
+
+  // ----
 
   test("Tokens Open/Close") {
     expectResult(List(TOpen(), TClose())) {
@@ -34,22 +37,23 @@ class ParserTest extends FunSuite {
     expectResult(List(TNumber("3.14"))) { tokenize("3.14".toList)}
   }
 
+  // ----
 
   test("Parse OpenClose") {
-    expectResult(List(Comb(List()))) {
-      parse("()")
-    }
+    val res = List(Comb(List()))
+    expectResult(res) { HandRolledParser.parse("()") }
+    expectResult(res) { Parser.parse("()") }
   }
 
   test("Parse Multiple") {
-    expectResult(List(Value(Num(1.0)), Value(Num(2.0)))) {
-      parse("1 2")
-    }
+    val res = List(Value(Num(1.0)), Value(Num(2.0)))
+    expectResult(res) { HandRolledParser.parse("1 2") }
+    expectResult(res) { Parser.parse("1 2") }
   }
 
   test("Parse Expr") {
-    expectResult(List(Comb(List(Symbol("+"), Value(Num(1.0)), Value(Num(2.0)))))) {
-      parse("(+ 1 2")
-    }
+    val res = List(Comb(List(Symbol("+"), Value(Num(1.0)), Value(Num(2.0)))))
+    expectResult(res) { HandRolledParser.parse("(+ 1 2") }
+    expectResult(res) { Parser.parse("(+ 1 2)") }
   }
 }
