@@ -9,6 +9,8 @@ It was never the intention create a complete Scheme implementation.
 If you're interested in Scheme on the JVM, I suggest Kawa
 http://www.gnu.org/software/kawa/
 
+http://martintrojer.github.io/scala/2013/06/06/scheme-in-scala/
+
 ## Usage
 
 ```
