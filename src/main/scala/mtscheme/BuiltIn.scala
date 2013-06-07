@@ -6,26 +6,26 @@ object BuiltIn {
 
   def aritFun(op: ((BigDecimal, BigDecimal) => BigDecimal))
              (env: Env, comb: List[ExprT]) = {
-    val error = new IllegalArgumentException("arithmetic error")
+    def error = throw new IllegalArgumentException("arithmetic error")
     comb.map(e => eval(env, e)._2) match {
       case Value(Num(first)) :: t =>
         val res = t.foldLeft(first)((acc, e) =>
-          e match { case Value(Num(v)) => op(acc,v); case _ => throw error })
+          e match { case Value(Num(v)) => op(acc,v); case _ => error })
         (env,Value(Num(res)))
-      case _                      => throw error
+      case _                      => error
     }
   }
 
   def combFun(op: ((BigDecimal, BigDecimal) => Boolean))
              (env: Env, comb: List[ExprT]) = {
-    val error = new IllegalArgumentException("comparison error")
+    def error = throw new IllegalArgumentException("comparison error")
     comb.map(e => eval(env, e)._2) match {
       case Value(Num(first)) :: t =>
         val res = t.foldLeft((true, first))((acc, e) => e match {
           case Value(Num(v))  => (acc._1 && op(acc._2, v), v)
-          case _              => throw error })
+          case _              => error })
         (env,Value(Bool(res._1)))
-      case _                      => throw error
+      case _                      => error
     }
   }
 
@@ -60,13 +60,13 @@ object BuiltIn {
   }
 
   def _if(env: Env, comb: List[ExprT]) = {
-    val error = new IllegalArgumentException("if")
+    def error = throw new IllegalArgumentException("if")
     val (condExpr, posExpr, negExpr) = comb match {
       case condExpr :: posExpr :: negExpr :: Nil  =>
         (condExpr, posExpr, Some(negExpr))
       case condExpr :: posExpr :: Nil             =>
         (condExpr, posExpr, None)
-      case _                                      => throw error
+      case _                                      => error
     }
     (eval(env, condExpr))._2 match {
         case Value(Bool(c)) =>
@@ -76,12 +76,12 @@ object BuiltIn {
             case Some(e)    => eval(env, e)
             case None       => (env, NullExpr())
           }
-        case _              => throw error
+        case _              => error
      }
   }
 
   def _cond(env: Env, comb: List[ExprT]) = {
-    val error = new IllegalArgumentException("cond")
+    def error = throw new IllegalArgumentException("cond")
 
     def doExpr(comb: List[ExprT]) = comb match {
       case Symbol("else") :: posExpr :: Nil =>
@@ -89,9 +89,9 @@ object BuiltIn {
       case condExpr :: posExpr :: Nil       => eval(env, condExpr)._2 match {
         case Value(Bool(true))  => Some(eval(env, posExpr)._2)
         case Value(Bool(false)) => None
-        case _                  => throw error
+        case _                  => error
       }
-      case _                                => throw error
+      case _                                => error
     }
 
     def runExprs(comb: List[ExprT]): ExprT = comb match {
@@ -106,11 +106,11 @@ object BuiltIn {
   }
 
   def _define(env: Env, comb: List[ExprT]) = {
-    val error = new IllegalArgumentException("define")
+    def error = throw new IllegalArgumentException("define")
     def getStr(expr: ExprT) = expr match {
       case Symbol(n)      => n
       case Value(Name(n)) => n
-      case _              => throw error
+      case _              => error
     }
     comb match {
       // variable definition (lambda 'values' fall into this category)
@@ -124,7 +124,7 @@ object BuiltIn {
         val args = buildList(ns.tail)
         (env.addEntry(fname -> Func(args, body)), NullExpr())
       }
-      case _                          => throw error
+      case _                          => error
     }
   }
 
@@ -186,22 +186,22 @@ object BuiltIn {
   }
 
   def _let(env: Env, comb: List[ExprT]) = {
-    val error = new IllegalArgumentException("let")
+    def error = throw new IllegalArgumentException("let")
     def doBind(acc: Env, binds: List[ExprT]): Env = binds match {
       case List()         =>
         acc
       case Comb(c) :: t   => c match {
         case Symbol(v) :: expr :: Nil =>
           doBind(acc.addEntry(v -> eval(env, expr)._2), t)
-        case _                        => throw error
+        case _                        => error
       }
-      case _              => throw error
+      case _              => error
     }
     comb match {
       case Comb(binds) :: body :: Nil =>
         val newEnv = doBind(env.expand(), binds)
         eval(newEnv, body)
-      case _                          => throw error
+      case _                          => error
     }
   }
 
