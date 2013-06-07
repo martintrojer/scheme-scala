@@ -28,7 +28,7 @@ object Interpreter {
       eval(env, h) match {
         case (_, Proc(f))             => apply(f, t, env)
         case (nEnv, Func(args, body)) => {
-          if (args.length != t.length) throw new IllegalArgumentException("invalid number or arguments")
+          if (args.length != t.length) throw new IllegalArgumentException("invalid number of arguments")
           val newEnv = (args zip t).foldLeft(nEnv.expand())((acc, av) => bindArg(acc, av._1, av._2))
           evalAll(newEnv, body)
         }
