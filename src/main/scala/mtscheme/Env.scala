@@ -10,7 +10,7 @@ case class Env(val env: EnvT) {
   def expand(): Env = Env(EnvMapT() :: env)
 
   def lookUp(s: String): Option[ExprT] = 
-    env find (_ contains s) map {entry => entry(s)}
+    env find (_ contains s) map (_(s))
 
   override def equals(that: Any) = that match {
     case Env(thatEnv) => env == thatEnv
