@@ -1,8 +1,10 @@
 package mtscheme
 
+import scala.io.StdIn
 import mtscheme.BuiltIn._
 import mtscheme.Interpreter.eval
 import mtscheme.Parser.parse
+
 
 object repl extends App {
 
@@ -16,7 +18,7 @@ object repl extends App {
     }
     try {
       print("> ")
-      val line = readLine()
+      val line = StdIn.readLine()
       (commandLoop _).tupled(eval(env, parse(line).head))
     } catch {
       case e: Exception => commandLoop(env, Value(Name("Error; " + e.getMessage)))
