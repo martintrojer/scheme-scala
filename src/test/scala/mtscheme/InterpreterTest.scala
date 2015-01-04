@@ -27,19 +27,19 @@ class InterpreterTest extends FunSuite {
   def getEnv(env: Env, exprS: String) = eval(env, parse(exprS).head)._1
 
   def testNumber(env: Env, exprS: String, correct: BigDecimal) = {
-    expectResult(correct) { getNumResult(env, parse(exprS).head) }
+    assertResult(correct) { getNumResult(env, parse(exprS).head) }
   }
 
   def testBool(env: Env, exprS: String, correct: Boolean) = {
-    expectResult(correct) { getBoolResult(env, parse(exprS).head) }
+    assertResult(correct) { getBoolResult(env, parse(exprS).head) }
   }
 
   def testNil(env: Env, exprS: String) = {
-    expectResult(NullExpr()) { eval(env, parse(exprS).head)._2 }
+    assertResult(NullExpr()) { eval(env, parse(exprS).head)._2 }
   }
 
   def testEList(env: Env, exprS: String, correct: List[ExprT]) = {
-    expectResult(correct) { getEListResult(env, parse(exprS).head) }
+    assertResult(correct) { getEListResult(env, parse(exprS).head) }
   }
 
   def testNumberG = (testNumber _).curried(globalEnv)
@@ -142,8 +142,8 @@ class InterpreterTest extends FunSuite {
   }
 
   test("define") {
-    expectResult(Some(Value(Num(4)))) { getEnv(globalEnv, "(define lisa 4)").lookUp("lisa") }
-    expectResult(Some(Value(Num(3)))) { getEnv(globalEnv, "(define nisse (+ 1 1 1))").lookUp("nisse") }
+    assertResult(Some(Value(Num(4)))) { getEnv(globalEnv, "(define lisa 4)").lookUp("lisa") }
+    assertResult(Some(Value(Num(3)))) { getEnv(globalEnv, "(define nisse (+ 1 1 1))").lookUp("nisse") }
   }
 
   test("cons") {
